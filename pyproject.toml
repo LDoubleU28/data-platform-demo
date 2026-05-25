@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "data-platform-demo"
+version = "0.1.0"
+description = "Dagster + Trino federated data-platform demo on synthetic/public data"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "dagster>=1.7",
+    "dagster-webserver>=1.7",
+    "trino>=0.328",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.4"]
+
+[tool.setuptools]
+packages = ["data_platform"]
+
+[tool.dagster]
+module_name = "data_platform.definitions"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

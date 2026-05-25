@@ -1,0 +1,39 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: dpd-postgres
+    environment:
+      POSTGRES_USER: demo
+      POSTGRES_PASSWORD: demo
+      POSTGRES_DB: demo
+    ports:
+      # Host 5433 -> container 5432 to avoid clashing with a local Postgres.
+      - "5433:5432"
+    volumes:
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U demo -d demo"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  trino:
+    image: trinodb/trino:latest
+    container_name: dpd-trino
+    ports:
+      - "8080:8080"
+    volumes:
+      # Catalog definitions: postgresql (federated source), tpch + memory (built-in connectors).
+      - ./trino/etc/catalog:/etc/trino/catalog:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      # /v1/info reports "starting":false once the coordinator is ready to serve.
+      test:
+        - "CMD-SHELL"
+        - "curl -fsS http://localhost:8080/v1/info | grep -q '\"starting\":false'"
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s

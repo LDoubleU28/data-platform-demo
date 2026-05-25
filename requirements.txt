@@ -1,0 +1,4 @@
+dagster>=1.7
+dagster-webserver>=1.7
+trino>=0.328
+pytest>=7.4
